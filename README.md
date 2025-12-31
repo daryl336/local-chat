@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lumina
+
+A sleek, modern chat interface for your local LLM. Built with Next.js, TypeScript, and Tailwind CSS.
+
+## Features
+
+- **Chat with your local LLM** - Connect to any OpenAI-compatible API
+- **Streaming responses** - Real-time token streaming for a smooth experience
+- **Agent configurations** - Create custom system prompts for different use cases
+- **Chat history** - All conversations stored locally in IndexedDB
+- **Dark theme** - Beautiful dark blue design
+- **Responsive** - Works on desktop and mobile
+
+## Prerequisites
+
+- Node.js 18+
+- A running local LLM backend (like [local-llm](https://github.com/your-repo/local-llm))
 
 ## Getting Started
 
-First, run the development server:
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd local-chat
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure the API URL**
+
+   Copy the example environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Edit `.env.local` to point to your local LLM backend:
+   ```
+   NEXT_PUBLIC_API_URL=http://localhost:8080
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open in browser**
+
+   Visit [http://localhost:3000](http://localhost:3000)
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Main chat page
+│   └── globals.css        # Global styles & theme
+├── components/
+│   ├── ui/                # Reusable UI components
+│   ├── layout/            # Sidebar, Header
+│   ├── chat/              # Chat components
+│   └── agents/            # Agent configuration
+├── hooks/                 # Custom React hooks
+├── lib/
+│   ├── api/              # API client
+│   ├── storage/          # IndexedDB operations
+│   └── utils/            # Utilities
+├── stores/               # Zustand state stores
+└── types/                # TypeScript definitions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **State**: Zustand
+- **Storage**: Dexie (IndexedDB)
+- **Icons**: Lucide React
+- **Markdown**: react-markdown + remark-gfm
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API Compatibility
 
-## Learn More
+Lumina connects to any OpenAI-compatible API. Required endpoints:
 
-To learn more about Next.js, take a look at the following resources:
+- `POST /v1/chat/completions` - Chat with streaming support
+- `GET /models/status` - Model status check
+- `GET /health` - Health check
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Vercel (Recommended)
 
-## Deploy on Vercel
+1. Push your code to GitHub
+2. Import the project in [Vercel](https://vercel.com)
+3. Add environment variable:
+   - `NEXT_PUBLIC_API_URL` - Your backend API URL
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Self-hosted
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+npm start
+```
+
+## License
+
+MIT

@@ -1,65 +1,121 @@
-import Image from "next/image";
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import { Sidebar, Header } from '@/components/layout';
+import { ChatContainer } from '@/components/chat';
+import { AgentModal } from '@/components/agents';
+import { useChat, useChats, useAgents, useModels } from '@/hooks';
+import { useChatStore } from '@/stores/chatStore';
+import { useSidebarStore } from '@/stores/sidebarStore';
+import * as chatStorage from '@/lib/storage/chats';
 
 export default function Home() {
+  const [chatTitle, setChatTitle] = useState<string | undefined>();
+
+  const {
+    chatId,
+    messages,
+    isStreaming,
+    streamingContent,
+    loadChat,
+    sendMessage,
+    newChat,
+    stopStreaming,
+  } = useChat();
+
+  const { activeAgentId, setActiveAgent } = useChatStore();
+  const { chats, refreshChats } = useChats();
+  const { agents, getAgentById } = useAgents();
+  const { isModelLoaded, checkStatus } = useModels();
+
+  const activeAgent = activeAgentId ? getAgentById(activeAgentId) : null;
+
+  // Check model status on mount and periodically
+  useEffect(() => {
+    checkStatus();
+    const interval = setInterval(checkStatus, 10000); // Check every 10 seconds
+    return () => clearInterval(interval);
+  }, [checkStatus]);
+
+  // Update chat title when messages change
+  useEffect(() => {
+    if (chatId && messages.length > 0) {
+      const chat = chats.find((c) => c.id === chatId);
+      setChatTitle(chat?.title || 'New Chat');
+    } else {
+      setChatTitle(undefined);
+    }
+  }, [chatId, messages, chats]);
+
+  // Handle new chat
+  const handleNewChat = useCallback(async () => {
+    await newChat();
+    refreshChats();
+  }, [newChat, refreshChats]);
+
+  // Handle chat selection
+  const handleSelectChat = useCallback(async (selectedChatId: string) => {
+    await loadChat(selectedChatId);
+
+    // Also load the agent associated with this chat
+    const chat = await chatStorage.getChat(selectedChatId);
+    if (chat?.agentId) {
+      setActiveAgent(chat.agentId);
+    } else {
+      setActiveAgent(null);
+    }
+
+    refreshChats();
+  }, [loadChat, setActiveAgent, refreshChats]);
+
+  // Handle agent selection
+  const handleSelectAgent = useCallback((agentId: string | null) => {
+    setActiveAgent(agentId);
+  }, [setActiveAgent]);
+
+  // Handle send message with agent system prompt
+  const handleSendMessage = useCallback((content: string) => {
+    const systemPrompt = activeAgent?.systemPrompt;
+    sendMessage(content, systemPrompt);
+    // Delay refresh to allow the message to be saved
+    setTimeout(refreshChats, 100);
+  }, [sendMessage, activeAgent, refreshChats]);
+
+  // Handle quick actions from welcome screen
+  const handleQuickAction = useCallback((action: string) => {
+    if (action === 'agent') {
+      // Open agent modal or focus sidebar agents section
+      useSidebarStore.getState().setSidebarExpanded(true);
+    }
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="h-screen flex overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar
+        onNewChat={handleNewChat}
+        onSelectChat={handleSelectChat}
+        onSelectAgent={handleSelectAgent}
+      />
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header title={chatTitle} />
+
+        <ChatContainer
+          messages={messages}
+          streamingContent={streamingContent}
+          isStreaming={isStreaming}
+          activeAgent={activeAgent}
+          onSendMessage={handleSendMessage}
+          onStopStreaming={stopStreaming}
+          onQuickAction={handleQuickAction}
+          isModelLoaded={isModelLoaded}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
+
+      {/* Agent Modal */}
+      <AgentModal />
     </div>
   );
 }
