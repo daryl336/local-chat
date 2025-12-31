@@ -6,6 +6,7 @@ export interface StreamChatOptions {
   maxTokens?: number;
   topP?: number;
   stop?: string[];
+  chatId?: string; // For RAG context injection
 }
 
 export async function* streamChatCompletion(
@@ -23,7 +24,16 @@ export async function* streamChatCompletion(
     stop: options?.stop,
   };
 
-  const response = await streamRequest('/v1/chat/completions', request);
+  console.log('[Stream] Starting request to:', model);
+  console.log('[Stream] Messages:', messages.length);
+
+  // Add chat_id query param for RAG context injection
+  const endpoint = options?.chatId
+    ? `/v1/chat/completions?chat_id=${encodeURIComponent(options.chatId)}`
+    : '/v1/chat/completions';
+
+  const response = await streamRequest(endpoint, request);
+  console.log('[Stream] Got response, status:', response.status);
 
   const reader = response.body?.getReader();
   if (!reader) {
@@ -32,17 +42,25 @@ export async function* streamChatCompletion(
 
   const decoder = new TextDecoder();
   let buffer = '';
+  let chunkCount = 0;
 
   try {
+    let readCount = 0;
     while (true) {
       const { done, value } = await reader.read();
+      readCount++;
+      console.log(`[Stream] Read #${readCount}, done=${done}, bytes=${value?.length || 0}`);
 
       if (done) {
+        console.log('[Stream] Stream done, total chunks:', chunkCount);
         break;
       }
 
-      buffer += decoder.decode(value, { stream: true });
+      const decoded = decoder.decode(value, { stream: true });
+      console.log('[Stream] Decoded text:', decoded.slice(0, 200));
+      buffer += decoded;
       const lines = buffer.split('\n');
+      console.log('[Stream] Lines count:', lines.length);
 
       // Keep the last incomplete line in the buffer
       buffer = lines.pop() || '';
@@ -55,26 +73,34 @@ export async function* streamChatCompletion(
         }
 
         const data = trimmedLine.slice(6); // Remove 'data: ' prefix
+        console.log('[Stream] SSE data:', data.slice(0, 100));
 
         if (data === '[DONE]') {
+          console.log('[Stream] Received [DONE] signal');
           return;
         }
 
         try {
           const chunk: ChatCompletionChunk = JSON.parse(data);
+          console.log('[Stream] Parsed chunk:', JSON.stringify(chunk.choices?.[0]));
           const content = chunk.choices?.[0]?.delta?.content;
 
           if (content) {
+            chunkCount++;
+            console.log('[Stream] YIELDING content:', content);
             yield content;
+          } else {
+            console.log('[Stream] No content in delta');
           }
-        } catch {
+        } catch (e) {
           // Skip invalid JSON lines
-          console.warn('Failed to parse SSE chunk:', data);
+          console.warn('Failed to parse SSE chunk:', data, e);
         }
       }
     }
   } finally {
     reader.releaseLock();
+    console.log('[Stream] Reader released');
   }
 }
 

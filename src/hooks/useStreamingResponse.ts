@@ -29,15 +29,18 @@ export function useStreamingResponse(options?: UseStreamingResponseOptions) {
 
     try {
       for await (const chunk of streamChatCompletion(model, messages, chatOptions)) {
+        console.log('[useStreamingResponse] Got chunk:', chunk, 'aborted:', abortRef.current);
         if (abortRef.current) {
           break;
         }
 
         fullContent += chunk;
+        console.log('[useStreamingResponse] Full content now:', fullContent);
         setStreamedContent(fullContent);
         options?.onChunk?.(chunk, fullContent);
       }
 
+      console.log('[useStreamingResponse] Loop finished, fullContent:', fullContent);
       if (!abortRef.current) {
         options?.onComplete?.(fullContent);
       }

@@ -3,3 +3,4 @@ export { MessageBubble } from './MessageBubble';
 export { MessageList } from './MessageList';
 export { MessageInput } from './MessageInput';
 export { ChatContainer } from './ChatContainer';
+export { DocumentUpload, DocumentChipList, UploadDropdown, useFileUpload } from './DocumentUpload';

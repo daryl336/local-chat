@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Sidebar, Header } from '@/components/layout';
 import { ChatContainer } from '@/components/chat';
 import { AgentModal } from '@/components/agents';
@@ -12,6 +12,20 @@ import * as chatStorage from '@/lib/storage/chats';
 export default function Home() {
   const [chatTitle, setChatTitle] = useState<string | undefined>();
 
+  const { chats, refreshChats, deleteChat } = useChats();
+
+  // Memoize options to ensure callbacks always have latest refreshChats reference
+  const chatOptions = useMemo(() => ({
+    onChatCreated: () => {
+      console.log('[page.tsx] onChatCreated called, refreshing chats...');
+      refreshChats();
+    },
+    onTitleUpdated: () => {
+      console.log('[page.tsx] onTitleUpdated called, refreshing chats...');
+      refreshChats();
+    },
+  }), [refreshChats]);
+
   const {
     chatId,
     messages,
@@ -21,11 +35,10 @@ export default function Home() {
     sendMessage,
     newChat,
     stopStreaming,
-  } = useChat();
+  } = useChat(chatOptions);
 
   const { activeAgentId, setActiveAgent } = useChatStore();
-  const { chats, refreshChats } = useChats();
-  const { agents, getAgentById } = useAgents();
+  const { getAgentById } = useAgents();
   const { isModelLoaded, checkStatus } = useModels();
 
   const activeAgent = activeAgentId ? getAgentById(activeAgentId) : null;
@@ -77,9 +90,7 @@ export default function Home() {
   const handleSendMessage = useCallback((content: string) => {
     const systemPrompt = activeAgent?.systemPrompt;
     sendMessage(content, systemPrompt);
-    // Delay refresh to allow the message to be saved
-    setTimeout(refreshChats, 100);
-  }, [sendMessage, activeAgent, refreshChats]);
+  }, [sendMessage, activeAgent]);
 
   // Handle quick actions from welcome screen
   const handleQuickAction = useCallback((action: string) => {
@@ -93,9 +104,11 @@ export default function Home() {
     <div className="h-screen flex overflow-hidden">
       {/* Sidebar */}
       <Sidebar
+        chats={chats}
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
         onSelectAgent={handleSelectAgent}
+        onDeleteChat={deleteChat}
       />
 
       {/* Main content */}
@@ -111,6 +124,12 @@ export default function Home() {
           onStopStreaming={stopStreaming}
           onQuickAction={handleQuickAction}
           isModelLoaded={isModelLoaded}
+          chatId={chatId}
+          onCreateChat={async () => {
+            const chat = await newChat();
+            refreshChats();
+            return chat.id;
+          }}
         />
       </div>
 

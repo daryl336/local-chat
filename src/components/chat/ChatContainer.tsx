@@ -15,6 +15,8 @@ interface ChatContainerProps {
   onStopStreaming?: () => void;
   onQuickAction?: (action: string) => void;
   isModelLoaded?: boolean;
+  chatId?: string | null;
+  onCreateChat?: () => Promise<string>;
 }
 
 export function ChatContainer({
@@ -26,6 +28,8 @@ export function ChatContainer({
   onStopStreaming,
   onQuickAction,
   isModelLoaded,
+  chatId,
+  onCreateChat,
 }: ChatContainerProps) {
   const hasMessages = messages.length > 0;
 
@@ -53,6 +57,8 @@ export function ChatContainer({
             isStreaming={isStreaming}
             activeAgent={activeAgent}
             disabled={!isModelLoaded}
+            chatId={chatId}
+            onCreateChat={onCreateChat}
             placeholder={
               isModelLoaded
                 ? 'Type your message...'
@@ -69,6 +75,8 @@ export function ChatContainer({
             isStreaming={isStreaming}
             activeAgent={activeAgent}
             disabled={!isModelLoaded}
+            chatId={chatId}
+            onCreateChat={onCreateChat}
             placeholder={
               isModelLoaded
                 ? 'Type your message...'

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useChatStore } from '@/stores/chatStore';
 import { useStreamingResponse } from './useStreamingResponse';
@@ -11,9 +11,14 @@ import { DEFAULT_MODEL } from '@/lib/constants';
 
 interface UseChatOptions {
   onError?: (error: Error) => void;
+  onChatCreated?: (chatId: string) => void;
+  onTitleUpdated?: (chatId: string, title: string) => void;
 }
 
 export function useChat(options?: UseChatOptions) {
+  // Use refs to avoid stale closure issues with callbacks
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
   const {
     currentChatId,
     messages,
@@ -34,7 +39,7 @@ export function useChat(options?: UseChatOptions) {
       setStreamingContent(fullContent);
     },
     onError: (error) => {
-      options?.onError?.(error);
+      optionsRef.current?.onError?.(error);
     },
   });
 
@@ -47,9 +52,9 @@ export function useChat(options?: UseChatOptions) {
       }
     } catch (err) {
       console.error('Failed to load chat:', err);
-      options?.onError?.(err instanceof Error ? err : new Error('Failed to load chat'));
+      optionsRef.current?.onError?.(err instanceof Error ? err : new Error('Failed to load chat'));
     }
-  }, [setCurrentChat, options]);
+  }, [setCurrentChat]);
 
   // Send a message
   const sendMessage = useCallback(async (
@@ -61,10 +66,15 @@ export function useChat(options?: UseChatOptions) {
     let chatId = currentChatId;
 
     // Create a new chat if needed
+    let isNewChat = false;
     if (!chatId) {
       const newChat = await chatStorage.createChat(activeAgentId);
       chatId = newChat.id;
+      isNewChat = true;
       setCurrentChat(chatId, []);
+      console.log('[useChat] New chat created:', chatId, 'calling onChatCreated...');
+      optionsRef.current?.onChatCreated?.(chatId);
+      console.log('[useChat] onChatCreated called');
     }
 
     // Add user message
@@ -101,7 +111,8 @@ export function useChat(options?: UseChatOptions) {
 
     try {
       const model = currentModel || DEFAULT_MODEL;
-      const fullResponse = await streamResponse(model, apiMessages);
+      // Pass chatId for RAG context injection
+      const fullResponse = await streamResponse(model, apiMessages, { chatId });
 
       // Add assistant message
       const assistantMessage: Message = {
@@ -118,10 +129,11 @@ export function useChat(options?: UseChatOptions) {
       });
 
       // Generate title for new chats (first exchange)
-      if (messages.length === 0) {
+      if (isNewChat || messages.length === 0) {
         generateChatTitle(content.trim(), fullResponse)
           .then(async (title) => {
             await chatStorage.updateChat(chatId, { title });
+            optionsRef.current?.onTitleUpdated?.(chatId, title);
           })
           .catch((err) => {
             console.error('Failed to generate chat title:', err);

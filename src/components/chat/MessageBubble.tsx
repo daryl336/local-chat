@@ -12,6 +12,17 @@ interface MessageBubbleProps {
   isStreaming?: boolean;
 }
 
+// Escape markdown patterns that shouldn't be interpreted as formatting
+// e.g., "5." at start of line shouldn't become an ordered list
+function escapeUnintendedMarkdown(content: string): string {
+  // Only escape if the entire content is just a number followed by a period (like "5." or "42.")
+  // This prevents short numeric answers from being rendered as lists
+  if (/^\d+\.\s*$/.test(content.trim())) {
+    return content.replace(/^(\d+)\./, '$1\\.');
+  }
+  return content;
+}
+
 export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false);
   const isUser = message.role === 'user';
@@ -68,6 +79,22 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
+                    p: ({ children }) => (
+                      <p className="mb-2 last:mb-0">{children}</p>
+                    ),
+                    ol: ({ children, start }) => (
+                      <ol start={start} className="list-decimal list-inside mb-2">
+                        {children}
+                      </ol>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc list-inside mb-2">
+                        {children}
+                      </ul>
+                    ),
+                    li: ({ children }) => (
+                      <li className="mb-1">{children}</li>
+                    ),
                     pre: ({ children }) => (
                       <pre className="bg-surface-tertiary rounded-lg p-3 overflow-x-auto my-2">
                         {children}
@@ -100,7 +127,7 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
                     ),
                   }}
                 >
-                  {message.content}
+                  {escapeUnintendedMarkdown(message.content)}
                 </ReactMarkdown>
               ) : null}
               {isStreaming && (
@@ -113,8 +140,11 @@ export function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
         </div>
 
         {/* Actions */}
-        {!isUser && !isStreaming && (
-          <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {!isStreaming && (
+          <div className={cn(
+            'mt-1 opacity-0 group-hover:opacity-100 transition-opacity',
+            isUser && 'text-right'
+          )}>
             <button
               onClick={handleCopy}
               className="inline-flex items-center gap-1 text-xs text-content-muted hover:text-content-secondary"

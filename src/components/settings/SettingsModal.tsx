@@ -198,7 +198,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <div>
                 <h3 className="text-sm font-semibold text-content mb-2">Chat History</h3>
                 <p className="text-sm text-content-muted mb-4">
-                  All your chat history is stored locally in your browser using IndexedDB.
+                  All your chat history and documents are stored on the local backend server.
                 </p>
 
                 {!showClearConfirm ? (
@@ -248,8 +248,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 <h3 className="text-sm font-semibold text-content mb-2">Storage Info</h3>
                 <div className="p-4 rounded-xl bg-surface-tertiary/30 border border-border/50">
                   <p className="text-sm text-content-secondary">
-                    Your data is stored in your browser&apos;s IndexedDB. Clearing browser data
-                    or using private browsing mode will remove your chat history.
+                    Your data is stored on the local backend server in the <code className="px-1.5 py-0.5 rounded bg-surface-tertiary text-xs">data/</code> directory.
+                    Chat history, uploaded documents, and FAISS indices persist across browser sessions.
                   </p>
                 </div>
               </div>

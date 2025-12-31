@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Send, Square, Bot, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { AgentConfiguration, CATEGORY_COLORS } from '@/types/agent';
+import { DocumentChipList, UploadDropdown, useFileUpload } from './DocumentUpload';
 
 interface MessageInputProps {
   onSend: (message: string) => void;
@@ -12,6 +13,8 @@ interface MessageInputProps {
   disabled?: boolean;
   activeAgent?: AgentConfiguration | null;
   placeholder?: string;
+  chatId?: string | null;
+  onCreateChat?: () => Promise<string>;
 }
 
 export function MessageInput({
@@ -21,10 +24,13 @@ export function MessageInput({
   disabled,
   activeAgent,
   placeholder = 'Type your message...',
+  chatId,
+  onCreateChat,
 }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { openFilePicker, FileInput } = useFileUpload({ chatId: chatId ?? null, onCreateChat });
 
   // Auto-resize textarea
   useEffect(() => {
@@ -62,7 +68,7 @@ export function MessageInput({
         <div className={cn(
           'relative rounded-2xl transition-all duration-300',
           'glass-strong',
-          isFocused && 'ring-2 ring-primary-500/30',
+          isFocused && 'border-primary-500/40',
           !disabled && 'glow-hover'
         )}>
           {/* Active agent indicator */}
@@ -77,8 +83,15 @@ export function MessageInput({
             </div>
           )}
 
+          {/* Document chips area */}
+          <DocumentChipList chatId={chatId ?? null} disabled={disabled} />
+
           {/* Input area */}
           <div className="flex items-end gap-3 p-3">
+            {/* Plus button with dropdown */}
+            <UploadDropdown onUploadFiles={openFilePicker} disabled={disabled} />
+
+            {/* Text input */}
             <div className="flex-1 relative">
               <textarea
                 ref={textareaRef}
@@ -91,7 +104,7 @@ export function MessageInput({
                 disabled={disabled}
                 rows={1}
                 className={cn(
-                  'w-full px-4 py-3 rounded-xl resize-none',
+                  'focus-none w-full px-4 py-3 rounded-xl resize-none',
                   'bg-transparent',
                   'text-content text-[15px] placeholder:text-content-muted',
                   'focus:outline-none',
@@ -101,11 +114,12 @@ export function MessageInput({
               />
             </div>
 
+            {/* Send/Stop button */}
             {isStreaming ? (
               <button
                 onClick={onStop}
                 className={cn(
-                  'h-12 w-12 rounded-xl flex items-center justify-center',
+                  'focus-none h-12 w-12 rounded-xl flex items-center justify-center',
                   'bg-accent-red/20 border border-accent-red/30 text-accent-red',
                   'hover:bg-accent-red/30 hover:scale-105',
                   'transition-all duration-200'
@@ -118,7 +132,7 @@ export function MessageInput({
                 onClick={handleSubmit}
                 disabled={!message.trim() || disabled}
                 className={cn(
-                  'h-12 w-12 rounded-xl flex items-center justify-center',
+                  'focus-none h-12 w-12 rounded-xl flex items-center justify-center',
                   'transition-all duration-200',
                   message.trim() && !disabled
                     ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50 hover:scale-105'
@@ -134,6 +148,9 @@ export function MessageInput({
             )}
           </div>
         </div>
+
+        {/* Hidden file input */}
+        {FileInput}
 
         {/* Hint */}
         <p className="text-[11px] text-content-muted/60 text-center mt-3">

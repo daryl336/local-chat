@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import {
   PanelLeftClose,
   PanelLeft,
@@ -11,11 +12,12 @@ import {
   Pencil,
   Sparkles,
   Plus,
+  Settings2,
 } from 'lucide-react';
-import { Button, Input } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { useSidebarStore } from '@/stores/sidebarStore';
 import { useChatStore } from '@/stores/chatStore';
-import { useChats, useAgents } from '@/hooks';
+import { useAgents } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { AgentCategory, CATEGORY_COLORS } from '@/types/agent';
 import { ChatSession } from '@/types/chat';
@@ -44,15 +46,17 @@ function groupChatsByDate(chats: ChatSession[]): Record<string, ChatSession[]> {
 }
 
 interface SidebarProps {
+  chats: ChatSession[];
   onNewChat: () => void;
   onSelectChat: (chatId: string) => void;
   onSelectAgent: (agentId: string | null) => void;
+  onDeleteChat: (chatId: string) => Promise<void>;
 }
 
-export function Sidebar({ onNewChat, onSelectChat, onSelectAgent }: SidebarProps) {
+export function Sidebar({ chats, onNewChat, onSelectChat, onSelectAgent, onDeleteChat }: SidebarProps) {
+  const router = useRouter();
   const { isExpanded, searchQuery, toggleSidebar, setSearchQuery, openAgentModal } = useSidebarStore();
   const { currentChatId, activeAgentId, setActiveAgent } = useChatStore();
-  const { chats, deleteChat } = useChats();
   const { templates, customAgents } = useAgents();
 
   const filteredChats = searchQuery
@@ -65,7 +69,7 @@ export function Sidebar({ onNewChat, onSelectChat, onSelectAgent }: SidebarProps
 
   const handleDeleteChat = async (chatId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    await deleteChat(chatId);
+    await onDeleteChat(chatId);
   };
 
   const handleAgentClick = (agentId: string) => {
@@ -152,13 +156,22 @@ export function Sidebar({ onNewChat, onSelectChat, onSelectAgent }: SidebarProps
               </span>
             )}
             {isExpanded && (
-              <button
-                onClick={() => openAgentModal()}
-                className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300 transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                New
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => router.push('/agents')}
+                  className="p-1 text-content-muted hover:text-content-secondary transition-colors"
+                  title="Manage Agents"
+                >
+                  <Settings2 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => openAgentModal()}
+                  className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  New
+                </button>
+              </div>
             )}
           </div>
 
@@ -246,13 +259,16 @@ interface AgentItemProps {
 }
 
 function AgentItem({ name, category, isActive, isExpanded, isTemplate, onClick, onEdit }: AgentItemProps) {
-  const colors = CATEGORY_COLORS[category];
+  const colors = CATEGORY_COLORS[category] || CATEGORY_COLORS.custom;
 
   return (
-    <button
+    <div
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClick()}
       className={cn(
-        'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all duration-200 group',
+        'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all duration-200 group cursor-pointer',
         isActive
           ? 'bg-primary-500/15 border border-primary-500/30 shadow-sm'
           : 'hover:bg-surface-tertiary/50 border border-transparent'
@@ -286,7 +302,7 @@ function AgentItem({ name, category, isActive, isExpanded, isTemplate, onClick, 
           )}
         </>
       )}
-    </button>
+    </div>
   );
 }
 
@@ -300,10 +316,13 @@ interface ChatItemProps {
 
 function ChatItem({ title, isActive, isExpanded, onClick, onDelete }: ChatItemProps) {
   return (
-    <button
+    <div
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClick()}
       className={cn(
-        'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all duration-200 group',
+        'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all duration-200 group cursor-pointer',
         isActive
           ? 'bg-surface-tertiary/80'
           : 'hover:bg-surface-tertiary/40'
@@ -322,13 +341,16 @@ function ChatItem({ title, isActive, isExpanded, onClick, onDelete }: ChatItemPr
             {title}
           </span>
           <button
-            onClick={onDelete}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(e);
+            }}
             className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-accent-red/20 rounded-lg transition-all"
           >
             <Trash2 className="w-3 h-3 text-accent-red" />
           </button>
         </>
       )}
-    </button>
+    </div>
   );
 }

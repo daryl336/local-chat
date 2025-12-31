@@ -1,9 +1,21 @@
+export interface ChatAttachment {
+  id: string;
+  type: 'image' | 'file' | 'audio' | 'video';
+  filename: string;
+  path: string;
+  mime_type?: string;
+  size_bytes?: number;
+  width?: number;
+  height?: number;
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
   tokenCount?: number;
+  attachments?: ChatAttachment[];
 }
 
 export interface ChatSession {
