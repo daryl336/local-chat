@@ -46,7 +46,7 @@ export async function getDocuments(chatId: string): Promise<DocumentListResponse
 
   // Return empty list if chat not found (404)
   if (response.status === 404) {
-    return { documents: [] };
+    return { documents: [], total: 0 };
   }
 
   if (!response.ok) {
