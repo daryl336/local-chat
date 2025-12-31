@@ -1,6 +1,6 @@
 import { AgentConfiguration } from '@/types/agent';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6999';
 
 export const DEFAULT_MODEL = 'mlx-community/Mistral-7B-Instruct-v0.3-4bit';
 

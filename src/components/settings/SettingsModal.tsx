@@ -93,7 +93,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 <div className="p-4 rounded-xl bg-surface-tertiary/30 border border-border/50">
                   <p className="text-sm text-content-secondary">
                     <span className="font-semibold text-content">Lumina</span> is a local-first chat interface
-                    for your MLX language models. All data is stored locally in your browser.
+                    for your MLX language models. All data is stored on your local backend server.
                   </p>
                 </div>
               </div>

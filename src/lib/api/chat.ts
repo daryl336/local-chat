@@ -142,11 +142,17 @@ export async function generateChatTitle(
   const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
     {
       role: 'system',
-      content: 'Generate a very short, concise title (3-6 words max) for this conversation. Reply with ONLY the title, no quotes, no explanation, no punctuation at the end.',
+      content: `You are a title generator. Generate a short title (3-6 words) that summarizes ONLY the topic being discussed.
+
+Rules:
+- Output ONLY the title, nothing else
+- No quotes, no prefixes like "Title:", no explanations
+- Do not include words like "User", "Assistant", "Question", "Chat"
+- Focus on the actual subject matter`,
     },
     {
       role: 'user',
-      content: conversationContext,
+      content: `Generate a title for this conversation:\n\n${conversationContext}`,
     },
   ];
 
@@ -158,11 +164,14 @@ export async function generateChatTitle(
 
     const title = response.choices?.[0]?.message?.content?.trim();
 
-    // Clean up the title - remove quotes, limit length
+    // Clean up the title - remove quotes, prefixes, limit length
     if (title) {
       return title
         .replace(/^["']|["']$/g, '') // Remove surrounding quotes
+        .replace(/^(Title:|Topic:|Subject:)\s*/i, '') // Remove common prefixes
+        .replace(/^(User|Assistant|Question|Chat)[\s:]+/i, '') // Remove role prefixes
         .replace(/[.!?]$/, '') // Remove trailing punctuation
+        .trim()
         .slice(0, 50); // Limit length
     }
 

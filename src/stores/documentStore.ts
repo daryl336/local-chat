@@ -83,12 +83,15 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   clearPendingFiles: () => set({ pendingFiles: [] }),
 
   loadDocuments: async (chatId) => {
-    set({ isLoading: true, currentChatId: chatId });
+    // Clear documents first to prevent stale data from previous chat
+    set({ isLoading: true, currentChatId: chatId, documents: [] });
     try {
       const response = await documentsApi.getDocuments(chatId);
       set({ documents: response.documents });
     } catch (error) {
       console.error('Failed to load documents:', error);
+      // Keep documents empty on error
+      set({ documents: [] });
     } finally {
       set({ isLoading: false });
     }

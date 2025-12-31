@@ -44,6 +44,11 @@ export async function getDocuments(chatId: string): Promise<DocumentListResponse
     `${API_BASE_URL}/storage/chats/${chatId}/documents`
   );
 
+  // Return empty list if chat not found (404)
+  if (response.status === 404) {
+    return { documents: [] };
+  }
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.detail || `Failed to get documents: ${response.statusText}`);
