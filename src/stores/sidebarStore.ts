@@ -4,6 +4,9 @@ interface SidebarState {
   // Sidebar visibility
   isExpanded: boolean;
 
+  // Mobile sidebar state
+  isMobileOpen: boolean;
+
   // Search
   searchQuery: string;
 
@@ -18,6 +21,9 @@ interface SidebarState {
   // Actions
   toggleSidebar: () => void;
   setSidebarExpanded: (expanded: boolean) => void;
+  setMobileOpen: (open: boolean) => void;
+  toggleMobileSidebar: () => void;
+  closeMobileSidebar: () => void;
   setSearchQuery: (query: string) => void;
   openAgentModal: (agentId?: string) => void;
   closeAgentModal: () => void;
@@ -27,6 +33,7 @@ interface SidebarState {
 
 export const useSidebarStore = create<SidebarState>((set) => ({
   isExpanded: true,
+  isMobileOpen: false,
   searchQuery: '',
   isAgentModalOpen: false,
   editingAgentId: null,
@@ -38,6 +45,15 @@ export const useSidebarStore = create<SidebarState>((set) => ({
 
   setSidebarExpanded: (expanded) =>
     set({ isExpanded: expanded }),
+
+  setMobileOpen: (open) =>
+    set({ isMobileOpen: open }),
+
+  toggleMobileSidebar: () =>
+    set((state) => ({ isMobileOpen: !state.isMobileOpen })),
+
+  closeMobileSidebar: () =>
+    set({ isMobileOpen: false }),
 
   setSearchQuery: (query) =>
     set({ searchQuery: query }),

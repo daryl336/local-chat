@@ -72,16 +72,16 @@ export function Modal({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-border">
             {title && (
-              <h2 className="text-lg font-semibold text-content">{title}</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-content">{title}</h2>
             )}
             {showCloseButton && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="h-8 w-8 rounded-lg"
+                className="h-9 w-9 sm:h-8 sm:w-8 rounded-lg"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -90,7 +90,7 @@ export function Modal({
         )}
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6 max-h-[70vh] sm:max-h-none overflow-y-auto">
           {children}
         </div>
       </div>

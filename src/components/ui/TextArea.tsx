@@ -26,8 +26,8 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            `w-full px-3 py-2 rounded-lg
-            bg-surface-secondary text-content
+            `w-full px-3 py-3 sm:py-2 rounded-lg min-h-[44px]
+            bg-surface-secondary text-content text-base sm:text-sm
             border border-border
             placeholder:text-content-muted
             transition-all duration-150

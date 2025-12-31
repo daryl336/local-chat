@@ -67,23 +67,25 @@ export function ChatContainer({
           />
         </>
       ) : (
-        <>
+        <div className="flex-1 flex flex-col overflow-y-auto">
           <WelcomeScreen onQuickAction={handleQuickAction} />
-          <MessageInput
-            onSend={onSendMessage}
-            onStop={onStopStreaming}
-            isStreaming={isStreaming}
-            activeAgent={activeAgent}
-            disabled={!isModelLoaded}
-            chatId={chatId}
-            onCreateChat={onCreateChat}
-            placeholder={
-              isModelLoaded
-                ? 'Type your message...'
-                : 'Waiting for model to load...'
-            }
-          />
-        </>
+          <div className="flex-shrink-0">
+            <MessageInput
+              onSend={onSendMessage}
+              onStop={onStopStreaming}
+              isStreaming={isStreaming}
+              activeAgent={activeAgent}
+              disabled={!isModelLoaded}
+              chatId={chatId}
+              onCreateChat={onCreateChat}
+              placeholder={
+                isModelLoaded
+                  ? 'Type your message...'
+                  : 'Waiting for model to load...'
+              }
+            />
+          </div>
+        </div>
       )}
     </div>
   );

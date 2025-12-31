@@ -103,7 +103,7 @@ export function AgentModal() {
       title={editingAgentId ? 'Edit Agent' : 'Create Agent'}
       size="lg"
     >
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <Input
           label="Name"
           placeholder="e.g., Marketing Expert"

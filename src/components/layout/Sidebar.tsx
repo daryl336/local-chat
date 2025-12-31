@@ -13,6 +13,7 @@ import {
   Sparkles,
   Plus,
   Settings2,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { useSidebarStore } from '@/stores/sidebarStore';
@@ -55,9 +56,16 @@ interface SidebarProps {
 
 export function Sidebar({ chats, onNewChat, onSelectChat, onSelectAgent, onDeleteChat }: SidebarProps) {
   const router = useRouter();
-  const { isExpanded, searchQuery, toggleSidebar, setSearchQuery, openAgentModal } = useSidebarStore();
+  const { isExpanded, isMobileOpen, searchQuery, toggleSidebar, closeMobileSidebar, setSearchQuery, openAgentModal } = useSidebarStore();
   const { currentChatId, activeAgentId, setActiveAgent } = useChatStore();
   const { templates, customAgents } = useAgents();
+
+  // Auto-close mobile sidebar on chat/agent selection
+  const handleMobileClose = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      closeMobileSidebar();
+    }
+  };
 
   const filteredChats = searchQuery
     ? chats.filter((chat) =>
@@ -80,18 +88,42 @@ export function Sidebar({ chats, onNewChat, onSelectChat, onSelectAgent, onDelet
       setActiveAgent(agentId);
       onSelectAgent(agentId);
     }
+    handleMobileClose();
+  };
+
+  const handleChatClick = (chatId: string) => {
+    onSelectChat(chatId);
+    handleMobileClose();
+  };
+
+  const handleNewChatClick = () => {
+    onNewChat();
+    handleMobileClose();
   };
 
   return (
-    <aside
-      className={cn(
-        'h-full flex flex-col glass-strong transition-all duration-300 ease-in-out',
-        isExpanded ? 'w-72' : 'w-[68px]'
+    <>
+      {/* Mobile backdrop overlay */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          onClick={closeMobileSidebar}
+        />
       )}
-    >
+
+      <aside
+        className={cn(
+          'h-full flex flex-col glass-strong transition-all duration-300 ease-in-out',
+          // Desktop: inline with width toggle
+          'hidden md:flex',
+          isExpanded ? 'md:w-72' : 'md:w-[68px]',
+          // Mobile: fixed overlay from left
+          isMobileOpen && 'fixed inset-y-0 left-0 z-50 flex w-72'
+        )}
+      >
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-border">
-        {isExpanded && (
+        {(isExpanded || isMobileOpen) && (
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
               <Sparkles className="w-5 h-5 text-white" />
@@ -99,11 +131,23 @@ export function Sidebar({ chats, onNewChat, onSelectChat, onSelectAgent, onDelet
             <span className="font-semibold text-lg text-content tracking-tight">Lumina</span>
           </div>
         )}
+        {/* Mobile close button */}
+        {isMobileOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={closeMobileSidebar}
+            className="h-9 w-9 rounded-lg md:hidden"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        )}
+        {/* Desktop toggle button */}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="h-9 w-9 rounded-lg"
+          className="h-9 w-9 rounded-lg hidden md:flex"
         >
           {isExpanded ? (
             <PanelLeftClose className="w-4 h-4" />
@@ -116,7 +160,7 @@ export function Sidebar({ chats, onNewChat, onSelectChat, onSelectAgent, onDelet
       {/* New Chat Button */}
       <div className="p-3">
         <Button
-          onClick={onNewChat}
+          onClick={handleNewChatClick}
           className={cn(
             'w-full gap-2 rounded-xl h-11 font-medium',
             'bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400',
@@ -227,7 +271,7 @@ export function Sidebar({ chats, onNewChat, onSelectChat, onSelectAgent, onDelet
                       title={chat.title}
                       isActive={currentChatId === chat.id}
                       isExpanded={isExpanded}
-                      onClick={() => onSelectChat(chat.id)}
+                      onClick={() => handleChatClick(chat.id)}
                       onDelete={(e) => handleDeleteChat(chat.id, e)}
                     />
                   ))}
@@ -244,7 +288,8 @@ export function Sidebar({ chats, onNewChat, onSelectChat, onSelectAgent, onDelet
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 

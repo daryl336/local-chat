@@ -7,6 +7,7 @@ export interface StreamChatOptions {
   topP?: number;
   stop?: string[];
   chatId?: string; // For RAG context injection
+  ragMode?: 'inject' | 'agent' | 'auto'; // RAG mode: 'auto' (default - uses agent when docs present), 'inject', or 'agent'
 }
 
 export async function* streamChatCompletion(
@@ -27,10 +28,20 @@ export async function* streamChatCompletion(
   console.log('[Stream] Starting request to:', model);
   console.log('[Stream] Messages:', messages.length);
 
-  // Add chat_id query param for RAG context injection
-  const endpoint = options?.chatId
-    ? `/v1/chat/completions?chat_id=${encodeURIComponent(options.chatId)}`
-    : '/v1/chat/completions';
+  // Add query params for RAG
+  let endpoint = '/v1/chat/completions';
+  const params = new URLSearchParams();
+
+  if (options?.chatId) {
+    params.set('chat_id', options.chatId);
+  }
+  if (options?.ragMode) {
+    params.set('rag_mode', options.ragMode);
+  }
+
+  if (params.toString()) {
+    endpoint += `?${params.toString()}`;
+  }
 
   const response = await streamRequest(endpoint, request);
   console.log('[Stream] Got response, status:', response.status);

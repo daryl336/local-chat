@@ -54,10 +54,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl max-h-[80vh] mx-4 rounded-2xl glass-strong border border-border shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-2xl max-h-[90vh] sm:max-h-[80vh] mx-4 rounded-2xl glass-strong border border-border shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-content">Settings</h2>
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-border">
+          <h2 className="text-base sm:text-lg font-semibold text-content">Settings</h2>
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-surface-tertiary/50 transition-colors"
@@ -67,13 +67,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 px-6 py-3 border-b border-border/50">
+        <div className="flex gap-1 px-4 py-2 sm:px-6 sm:py-3 border-b border-border/50">
           {(['general', 'models', 'data'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
-                'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all',
                 activeTab === tab
                   ? 'bg-primary-500/20 text-primary-400'
                   : 'text-content-secondary hover:bg-surface-tertiary/50'
@@ -85,7 +85,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(80vh-140px)]">
+        <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-140px)] sm:max-h-[calc(80vh-140px)]">
           {activeTab === 'general' && (
             <div className="space-y-6">
               <div>
@@ -123,13 +123,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
               <div>
                 <h3 className="text-sm font-semibold text-content mb-2">Statistics</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-4 rounded-xl bg-surface-tertiary/30 border border-border/50">
-                    <p className="text-2xl font-bold text-content">{chats.length}</p>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <div className="p-3 sm:p-4 rounded-xl bg-surface-tertiary/30 border border-border/50">
+                    <p className="text-xl sm:text-2xl font-bold text-content">{chats.length}</p>
                     <p className="text-xs text-content-muted">Total Chats</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-surface-tertiary/30 border border-border/50">
-                    <p className="text-2xl font-bold text-content">{chatModels.length}</p>
+                  <div className="p-3 sm:p-4 rounded-xl bg-surface-tertiary/30 border border-border/50">
+                    <p className="text-xl sm:text-2xl font-bold text-content">{chatModels.length}</p>
                     <p className="text-xs text-content-muted">Models Available</p>
                   </div>
                 </div>

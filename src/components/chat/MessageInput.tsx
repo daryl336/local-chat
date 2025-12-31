@@ -62,7 +62,7 @@ export function MessageInput({
   const agentColors = activeAgent ? CATEGORY_COLORS[activeAgent.category] : null;
 
   return (
-    <div className="p-4 pb-6">
+    <div className="p-2 pb-4 sm:p-4 sm:pb-6">
       <div className="max-w-4xl mx-auto">
         {/* Input container with glass effect */}
         <div className={cn(
@@ -87,7 +87,7 @@ export function MessageInput({
           <DocumentChipList chatId={chatId ?? null} disabled={disabled} />
 
           {/* Input area */}
-          <div className="flex items-end gap-3 p-3">
+          <div className="flex items-end gap-2 p-2 sm:gap-3 sm:p-3">
             {/* Plus button with dropdown */}
             <UploadDropdown onUploadFiles={openFilePicker} disabled={disabled} />
 
@@ -104,9 +104,9 @@ export function MessageInput({
                 disabled={disabled}
                 rows={1}
                 className={cn(
-                  'focus-none w-full px-4 py-3 rounded-xl resize-none',
+                  'focus-none w-full px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl resize-none',
                   'bg-transparent',
-                  'text-content text-[15px] placeholder:text-content-muted',
+                  'text-content text-sm sm:text-[15px] placeholder:text-content-muted',
                   'focus:outline-none',
                   'disabled:opacity-50 disabled:cursor-not-allowed',
                   'transition-all duration-150'
@@ -119,7 +119,7 @@ export function MessageInput({
               <button
                 onClick={onStop}
                 className={cn(
-                  'focus-none h-12 w-12 rounded-xl flex items-center justify-center',
+                  'focus-none h-11 w-11 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center flex-shrink-0',
                   'bg-accent-red/20 border border-accent-red/30 text-accent-red',
                   'hover:bg-accent-red/30 hover:scale-105',
                   'transition-all duration-200'
@@ -132,7 +132,7 @@ export function MessageInput({
                 onClick={handleSubmit}
                 disabled={!message.trim() || disabled}
                 className={cn(
-                  'focus-none h-12 w-12 rounded-xl flex items-center justify-center',
+                  'focus-none h-11 w-11 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center flex-shrink-0',
                   'transition-all duration-200',
                   message.trim() && !disabled
                     ? 'bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-500/30 hover:shadow-primary-500/50 hover:scale-105'
@@ -152,8 +152,8 @@ export function MessageInput({
         {/* Hidden file input */}
         {FileInput}
 
-        {/* Hint */}
-        <p className="text-[11px] text-content-muted/60 text-center mt-3">
+        {/* Hint - hidden on mobile */}
+        <p className="hidden sm:block text-[11px] text-content-muted/60 text-center mt-3">
           <span className="px-1.5 py-0.5 rounded bg-surface-tertiary/30 text-content-muted/80 font-medium">Enter</span>
           {' '}to send{' '}
           <span className="mx-1 text-content-muted/40">|</span>

@@ -33,8 +33,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              `w-full h-10 px-3 rounded-lg
-              bg-surface-secondary text-content
+              `w-full h-11 sm:h-10 px-3 rounded-lg
+              bg-surface-secondary text-content text-base sm:text-sm
               border border-border
               placeholder:text-content-muted
               transition-all duration-150

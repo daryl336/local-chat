@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Settings, Cpu, Loader2, ChevronDown, Check, HardDrive } from 'lucide-react';
+import { Settings, Cpu, Loader2, ChevronDown, Check, HardDrive, Menu } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { SettingsModal } from '@/components/settings';
 import { useModels } from '@/hooks';
+import { useSidebarStore } from '@/stores/sidebarStore';
 import { cn } from '@/lib/utils/cn';
 
 interface HeaderProps {
@@ -13,6 +14,7 @@ interface HeaderProps {
 
 export function Header({ title }: HeaderProps) {
   const { currentModel, isModelLoaded, isModelLoading, localModels, loadModel } = useModels();
+  const { toggleMobileSidebar } = useSidebarStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -48,16 +50,26 @@ export function Header({ title }: HeaderProps) {
   );
 
   return (
-    <header className="h-16 flex items-center justify-between px-6 border-b border-border/50 glass">
+    <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-border/50 glass">
       <div className="flex items-center gap-3">
+        {/* Mobile hamburger menu */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-10 w-10 rounded-xl md:hidden"
+          onClick={toggleMobileSidebar}
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+
         {title && (
-          <h1 className="text-lg font-semibold text-content truncate max-w-[400px]">
+          <h1 className="text-base sm:text-lg font-semibold text-content truncate max-w-[120px] sm:max-w-[200px] md:max-w-[400px]">
             {title}
           </h1>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Model selector */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -108,7 +120,7 @@ export function Header({ title }: HeaderProps) {
 
           {/* Dropdown menu */}
           {isDropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 py-2 rounded-xl glass-strong border border-border shadow-xl z-50">
+            <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-80 py-2 rounded-xl glass-strong border border-border shadow-xl z-50">
               <div className="px-3 pb-2 mb-2 border-b border-border/50">
                 <span className="text-[11px] font-semibold text-content-muted uppercase tracking-wider">
                   Available Models

@@ -51,36 +51,36 @@ export function WelcomeScreen({ userName, onQuickAction }: WelcomeScreenProps) {
 
   return (
     <div className={cn(
-      'flex-1 flex flex-col items-center justify-center px-6 py-12',
+      'flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12 min-h-0',
       mounted && 'animate-fade-in'
     )}>
       {/* Logo with glow effect */}
-      <div className="mb-10 relative">
+      <div className="mb-6 sm:mb-10 relative">
         <div className="absolute inset-0 bg-primary-500/30 blur-2xl rounded-full scale-150" />
-        <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 flex items-center justify-center shadow-2xl animate-pulse-glow">
-          <Sparkles className="w-10 h-10 text-white" />
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 flex items-center justify-center shadow-2xl animate-pulse-glow">
+          <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
         </div>
       </div>
 
       {/* Greeting */}
-      <div className="text-center mb-14">
-        <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">
+      <div className="text-center mb-8 sm:mb-14">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-3 tracking-tight">
           <span className="gradient-text">{greeting}</span>
           {userName && <span className="text-content">, {userName}</span>}
         </h1>
-        <p className="text-lg text-content-secondary font-light">
+        <p className="text-base sm:text-lg text-content-secondary font-light">
           {subGreeting}
         </p>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full max-w-3xl mb-14">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5 w-full max-w-3xl mb-8 sm:mb-14">
         {quickActions.map((action, index) => (
           <button
             key={action.action}
             onClick={() => onQuickAction?.(action.action)}
             className={cn(
-              'group relative p-5 rounded-2xl text-left',
+              'group relative p-4 sm:p-5 rounded-2xl text-left',
               'glass card-interactive',
               'hover:border-primary-500/30',
               mounted && 'animate-slide-up'
@@ -93,20 +93,22 @@ export function WelcomeScreen({ userName, onQuickAction }: WelcomeScreenProps) {
               action.gradient
             )} />
 
-            <div className="relative">
+            <div className="relative flex items-center gap-3 sm:block">
               <div className={cn(
-                'w-12 h-12 rounded-xl flex items-center justify-center mb-4',
+                'w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center sm:mb-4 flex-shrink-0',
                 'bg-gradient-to-br',
                 action.gradient,
                 'group-hover:scale-110 transition-transform duration-300'
               )}>
-                <action.icon className={cn('w-6 h-6', action.iconColor)} />
+                <action.icon className={cn('w-5 h-5 sm:w-6 sm:h-6', action.iconColor)} />
               </div>
-              <h3 className="font-semibold text-content mb-1.5 flex items-center gap-2">
-                {action.label}
-                <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary-400" />
-              </h3>
-              <p className="text-sm text-content-muted">{action.description}</p>
+              <div className="flex-1 sm:flex-none">
+                <h3 className="font-semibold text-content mb-0.5 sm:mb-1.5 flex items-center gap-2 text-sm sm:text-base">
+                  {action.label}
+                  <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary-400 hidden sm:block" />
+                </h3>
+                <p className="text-xs sm:text-sm text-content-muted">{action.description}</p>
+              </div>
             </div>
           </button>
         ))}
